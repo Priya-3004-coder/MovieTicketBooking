@@ -55,3 +55,27 @@ export const getAllBookings=async(req,res)=>{
     }
 
 }
+
+// DELETE show
+export const deleteShow = async(req, res) => {
+    try {
+        const { showId } = req.params;
+        await Show.findByIdAndDelete(showId);
+        res.json({ success: true, message: "Show deleted successfully" });
+    } catch (error) {
+        res.json({ success: false, message: error.message });
+    }
+}
+
+// PUT update show price
+export const updateShow = async(req, res) => {
+    try {
+        const { showId } = req.params;
+        const { showPrice } = req.body;
+        await Show.findByIdAndUpdate(showId, { showPrice });
+        res.json({ success: true, message: "Show updated successfully" });
+    } catch (error) {
+        res.json({ success: false, message: error.message });
+    }
+}
+

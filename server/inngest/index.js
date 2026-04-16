@@ -112,13 +112,13 @@ const sendShowReminders=inngest.createFunction(
     {id:"send-show-reminders",triggers:[{cron:"0 */8 * * *"}]}, //every 8 hours
     async({step})=>{
         const now=new Date();
-        const in8Hours=new Date(now.gerTime() + 8 * 60 * 60 * 1000);
+        const in8Hours=new Date(now.getTime() + 8 * 60 * 60 * 1000);
         const windowStart=new Date(in8Hours.getTime()- 10 * 60 * 1000);
         
         //prepare reminder tasks
         const reminderTasks=await step.run("prepare-reminder-tasks",async()=>{
             const shows=await Show.find({
-                showTime:{$gte: windowStart, $lte: in8Hours},
+                showDateTime:{$gte: windowStart, $lte: in8Hours},
             }).populate('movie');
 
             const tasks=[];
@@ -133,7 +133,7 @@ const sendShowReminders=inngest.createFunction(
                         userEmail: user.email,
                         userName:user.name,
                         movieTitle:show.movie.title,
-                        showTime: show.showTime,
+                        showTime: show.showDateTime,
                     })
                 }
             }
@@ -153,9 +153,9 @@ const sendShowReminders=inngest.createFunction(
                                 <p>This is a quick reminder that your movie:</p>
                                 <h3 style="color: #F84565;">"${task.movieTitle}"</h3>
                                 <p>
-                                    is scheduled for <strong>${new Date(task.showTime).
+                                    is scheduled for <strong>${new Date(task.showDateTime).
                                     toLocaleDateString('en-US', { timeZone: 'Asia/Kolkata' })}</strong> at
-                                    <strong>${new Date(task.showTime).toLocaleTimeString
+                                    <strong>${new Date(task.showDateTime).toLocaleTimeString
                                     ('en-US', { timeZone: 'Asia/Kolkata' })}</strong>.
                                 </p>
                                 <p>It starts in approximately <strong>8 hours</strong>
@@ -167,7 +167,7 @@ const sendShowReminders=inngest.createFunction(
             )
         })
         const sent=results.filter(r=>r.status=== "fulfilled").length;
-        const failed=results.length=sent;
+        const failed=results.length-sent;
 
         return {
             sent,
@@ -184,14 +184,14 @@ const sendNewShowNotifications=inngest.createFunction(
         const {movieTitle}=event.data;
         const users=await User.find({})
 
-        for(user of users){
+        for(const user of users){
             const userEmail= user.email;
             const userName= user.name;
             const subject=`New show added: ${movieTitle}`;
             const body=`<div style="font-family: Arial, sans-serif; padding:20px;">
                             <h2> Hi ${userName},</h2>
                             <p>We've just added a new show to our library:</p>
-                            <h3 style="color:#F84565>"${movieTitle}"</h3>
+                            <h3 style="color:#F84565;">"${movieTitle}"</h3>
                             <p>Visit our website</p>
                             <br/>
                             <p>Thanks,<br/>Quickshow Team</p>

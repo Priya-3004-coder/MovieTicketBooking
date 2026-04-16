@@ -3,6 +3,7 @@ import Loading from '../../components/Loading'
 import Title from '../../components/admin/Title'
 import { dateFormat } from '../../lib/dateFormat'
 import { useAppContext } from '../../context/AppContext'
+import toast from 'react-hot-toast'
 
 const ListShows = () => {
 
@@ -22,6 +23,31 @@ const ListShows = () => {
             console.error(error)
         }
     }
+
+        // Delete handler
+const handleDelete = async(showId) => {
+    const { data } = await axios.delete(`/api/admin/delete-show/${showId}`, {
+        headers: { Authorization: `Bearer ${await getToken()}` }
+    });
+    if (data.success) {
+        toast.success(data.message);
+        getAllShows();
+    }
+}
+
+// Update handler
+const handleUpdate = async(showId, newPrice) => {
+    const { data } = await axios.put(`/api/admin/update-show/${showId}`, 
+        { showPrice: newPrice },
+        { headers: { Authorization: `Bearer ${await getToken()}` } }
+    );
+    if (data.success) {
+        toast.success(data.message);
+        getAllShows();
+    }
+}
+
+
     useEffect(()=>{
         if(user){
             getAllShows();
@@ -39,6 +65,8 @@ const ListShows = () => {
                         <th className='p-2 font-medium '>Show Time</th>
                         <th className='p-2 font-medium '>Total Bookings</th>
                         <th className='p-2 font-medium '>Earnings</th>
+                        <th className='p-2 font-medium'>Actions</th>
+                        
                     </tr>
                 </thead>
                 <tbody className='text-sm font-light'>
@@ -48,6 +76,10 @@ const ListShows = () => {
                             <td className='p-2'>{dateFormat(show.showDateTime)}</td>
                             <td className='p-2'>{Object.keys(show.occupiedSeats).length}</td>
                             <td className='p-2'>{currency} {Object.keys(show.occupiedSeats).length * show.showPrice}</td>
+                            <td className='p-2'>
+                            <button onClick={() => handleDelete(show._id)} className='text-red-500 hover:text-red-700 text-sm cursor-pointer'>Delete</button>
+                            <button onClick={() => handleUpdate(show._id, prompt('Enter new price:'))} className='text-primary hover:text-primary-dull text-sm cursor-pointer ml-3'>Edit Price</button>
+                            </td>
                         </tr>
                     ))}
                 </tbody>

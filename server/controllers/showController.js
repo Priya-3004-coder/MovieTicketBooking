@@ -1,6 +1,7 @@
 import axios from 'axios';
 import Movie from '../models/Movie.js';
 import Show from '../models/Show.js';
+import { inngest } from '../inngest/index.js';
 
 //API to get now playing movies from tmdb api
 export const getNowPlayingMovies=async(req,res)=>{
@@ -88,8 +89,15 @@ export const getShows=async(req,res)=>{
     try {
         const shows=await Show.find({showDateTime:{$gte: new Date()}}).populate('movie').sort({showDateTime:1});
         //filter unique shows
-        const uniqueShows=new Set(shows.map(show=>show.movie));
-        res.json({success:true,shows:Array.from(uniqueShows)})
+        const uniqueShows = [];
+        const seenIds = new Set();
+        shows.forEach(show => {
+            if (!seenIds.has(show.movie._id.toString())) {
+                seenIds.add(show.movie._id.toString());
+                uniqueShows.push(show.movie);
+            }
+        });
+        res.json({success:true, shows: uniqueShows});
     } catch (error) {
         console.error(error);
     }
