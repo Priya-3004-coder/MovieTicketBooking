@@ -124,3 +124,16 @@ export const getShow=async(req,res)=>{
         res.json({success: false,message:error.message})
     }
 }
+
+export const getMovieTrailer = async(req, res) => {
+    try {
+        const { movieId } = req.params;
+        const { data } = await axios.get(`https://api.themoviedb.org/3/movie/${movieId}/videos`, {
+            headers: { Authorization: `Bearer ${process.env.TMDB_API_KEY}` }
+        });
+        const trailer = data.results.find(v => v.type === 'Trailer' && v.site === 'YouTube');
+        res.json({ success: true, key: trailer ? trailer.key : null });
+    } catch (error) {
+        res.json({ success: false, message: error.message });
+    }
+}

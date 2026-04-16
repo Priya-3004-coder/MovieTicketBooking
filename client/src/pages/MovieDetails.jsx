@@ -13,6 +13,7 @@ const MovieDetails = () => {
     const navigate=useNavigate()
     const {id} = useParams()
     const[show, setShow] = useState(null)
+    const [trailerKey, setTrailerKey] = useState(null)
     const {shows,axios,getToken,user,fetchFavoriteMovies,favoriteMovies,image_base_url}=useAppContext()
 
     const getShow = async()=>{
@@ -39,8 +40,15 @@ const MovieDetails = () => {
         }
     }
 
+    const getTrailer = async () => {
+    const { data } = await axios.get(`/api/show/trailer/${id}`);
+    if (data.success) setTrailerKey(data.key);
+    }
+
+
     useEffect(()=>{
         getShow()
+        getTrailer()
     },[id])
 
     return show ? (
@@ -61,7 +69,8 @@ const MovieDetails = () => {
                         {timeFormat(show.movie.runtime)} . {show.movie.genres.map(genre => genre.name).join(", ")} . {show.movie.release_date.split("-")[0]}
                     </p>
                     <div className='flex items-center flex-wrap gap-4 mt-4'>
-                        <button className='flex items-center gap-2 px-7 py-3 text-sm bg-gray-800 hover:bg-gray-900 transition rounded-md font-medium cursor-pointer active:scale-95'>
+                        <button onClick={() => trailerKey && window.open(`https://www.youtube.com/watch?v=${trailerKey}`, '_blank')}
+                        className='flex items-center gap-2 px-7 py-3 text-sm bg-gray-800 hover:bg-gray-900 transition rounded-md font-medium cursor-pointer active:scale-95'>
                             <PlayCircleIcon className='w-5 h-5'/>
                             Watch Trailer
                         </button>
