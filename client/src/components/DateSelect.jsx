@@ -33,7 +33,7 @@ const DateSelect = ({ dateTime, id }) => {
                             {Object.keys(dateTime).map((date) => (
                                 <button onClick={() => setSelected(date)} key={date} className={`flex flex-col items-center justify-center h-14 w-14 aspect-square rounded cursor-pointer ${selected === date ?
                                     "bg-primary text-white" : "border border-primary/70"}`}>
-                                    <span>{new Date(date).getDate()}</span>
+                                    <span>{new Date(date + "T00:00:00").getDate()}</span>
                                     <span>{new Date(date + "T00:00:00").toLocaleDateString("en-US", { month: "short" })}</span>
                                 </button>
                             ))}

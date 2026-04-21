@@ -18,6 +18,8 @@ const AddShows = () => {
     const [dateTimeInput,setDateTimeInput]= useState("");
     const [showPrice,setShowPrice]= useState("");
     const [addingShow,setAddingShow]=useState(false)
+    const [theaters, setTheaters] = useState([])
+    const [selectedTheater, setSelectedTheater] = useState(null)
 
     const fetchNowPlayingMovies=async()=>{
         try {
@@ -62,7 +64,7 @@ const AddShows = () => {
         try {
             setAddingShow(true)
 
-            if(!selectedMovie || Object.keys(dateTimeSelection).length===0 || !showPrice){
+            if(!selectedMovie ||  !selectedTheater || Object.keys(dateTimeSelection).length===0 || !showPrice){
                 return toast('Missing required fields');
             }
 
@@ -70,6 +72,7 @@ const AddShows = () => {
 
             const  payload={
                 movieId:selectedMovie,
+                theaterId: selectedTheater,
                 showsInput,
                 showPrice:Number(showPrice)
             }
@@ -91,10 +94,17 @@ const AddShows = () => {
         setAddingShow(false);
     }
 
+    const fetchTheaters = async () => {
+    const { data } = await axios.get('/api/theater/all')
+    if (data.success) setTheaters(data.theaters)
+}
+
+
 
     useEffect(()=>{
         if(user){
             fetchNowPlayingMovies();
+            fetchTheaters();
         }
     }, [user]);
 
@@ -129,6 +139,21 @@ const AddShows = () => {
                     ))}
                 </div>
             </div>
+            {/* Theaters input */}
+            <div className='mt-8'>
+    <p className='text-lg font-medium mb-4'>Select Theater</p>
+    <div className='flex flex-wrap gap-4'>
+        {theaters.map((theater) => (
+            <div key={theater._id} onClick={() => setSelectedTheater(theater._id)}
+                className={`border rounded-lg px-4 py-3 cursor-pointer transition ${selectedTheater === theater._id ? 'border-primary bg-primary/10' : 'border-gray-600'}`}>
+                <p className='font-medium'>{theater.name}</p>
+                <p className='text-gray-400 text-sm'>{theater.city}</p>
+            </div>
+        ))}
+    </div>
+</div>
+
+
             {/* Show price input */}
             <div className='mt-8'>
                 <label className='block text-sm font-medium mb-2'>Show Price</label>

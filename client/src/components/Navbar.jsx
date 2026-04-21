@@ -12,6 +12,10 @@ const Navbar = () => {
     const {openSignIn}=useClerk()
     const navigate=useNavigate()
     const {favoriteMovies}=useAppContext()
+    const [showSearch, setShowSearch] = useState(false)
+    const [searchQuery, setSearchQuery] = useState('')
+    const {shows} = useAppContext()
+
 
 
     return (
@@ -27,13 +31,37 @@ const Navbar = () => {
                 <XIcon className='md:hidden absolute top-6 right-6 w-6 h-6 cursor-pointer' onClick={()=>setIsOpen(!isOpen)}/>
                 <Link onClick={()=>{scrollTo(0,0);setIsOpen(false)}} to='/'>Home</Link>
                 <Link onClick={()=>{scrollTo(0,0);setIsOpen(false)}} to='/movies'>Movies</Link>
-                <Link onClick={()=>{scrollTo(0,0);setIsOpen(false)}} to='/'>Theaters</Link>
-                <Link onClick={()=>{scrollTo(0,0);setIsOpen(false)}} to='/'>Releases</Link>
+                <Link onClick={()=>{scrollTo(0,0);setIsOpen(false)}} to='/theaters'>Theaters</Link>
+                <Link onClick={()=>{scrollTo(0,0);setIsOpen(false)}} to='/releases'>Releases</Link>
                 {favoriteMovies.length>0 && <Link onClick={()=>{scrollTo(0,0);setIsOpen(false)}} to='/favorite'>Favorites</Link>}
             </div>
 
             <div className='flex items-center gap-8'>
-                <SearchIcon className='max-md:hidden w-6 h-6 cursor-pointer'/>
+                <SearchIcon  onClick={() => setShowSearch(prev => !prev)} className='max-md:hidden w-6 h-6 cursor-pointer'/>
+                {showSearch && (
+    <div className='absolute top-16 right-36 bg-black/90 border border-gray-300/20 rounded-lg p-4 w-72 z-50'>
+        <input
+            autoFocus
+            type="text"
+            placeholder='Search movies...'
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className='w-full bg-transparent outline-none border-b border-gray-500 pb-2 text-sm'
+        />
+        <div className='mt-3 max-h-60 overflow-y-auto'>
+            {shows
+                .filter(movie => movie.title.toLowerCase().includes(searchQuery.toLowerCase()))
+                .map((movie, index) => (
+                    <div key={index} onClick={() => { navigate(`/movies/${movie._id}`); setShowSearch(false); scrollTo(0,0) }}
+                        className='flex items-center gap-3 py-2 cursor-pointer hover:bg-white/10 px-2 rounded'>
+                        <p className='text-sm'>{movie.title}</p>
+                    </div>
+                ))
+            }
+        </div>
+    </div>
+)}
+
                 {
                     !user ? (
                         <button onClick={openSignIn} className='px-4 py-1 sm:px-7 sm:py-2 bg-primary hover:bg-primary-dull transition rounded-full font-medium cursor-pointer'>Login</button>

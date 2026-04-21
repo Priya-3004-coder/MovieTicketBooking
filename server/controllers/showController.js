@@ -21,7 +21,7 @@ export const getNowPlayingMovies=async(req,res)=>{
 //API to add a new show to the database
 export const addShow=async(req,res)=>{
     try {
-        const {movieId,showsInput,showPrice}=req.body
+        const {movieId,theaterId,showsInput,showPrice}=req.body
 
         let movie =await Movie.findById(movieId)
         if(!movie){
@@ -61,6 +61,7 @@ export const addShow=async(req,res)=>{
                 showsToCreate.push({
                     movie:movieId,
                     showDateTime:new Date(dateTimeString),
+                    theater: theaterId, 
                     showPrice,
                     occupiedSeats:{}
                 })
@@ -108,7 +109,7 @@ export const getShow=async(req,res)=>{
     try {
         const {movieId}=req.params;
         //get all upcoming shows for the movie
-        const shows=await Show.find({movie:movieId,showDateTime:{$gte: new Date()}})
+        const shows=await Show.find({movie:movieId,showDateTime:{$gte: new Date()}}).populate('theater');
         const movie=await Movie.findById(movieId);
         const dateTime={};
         shows.forEach((show)=>{
@@ -116,7 +117,7 @@ export const getShow=async(req,res)=>{
             if(!dateTime[date]){
                 dateTime[date]=[];
             }
-            dateTime[date].push({time: show.showDateTime,showId:show._id});
+            dateTime[date].push({time: show.showDateTime,showId:show._id, theater: show.theater});
         })
         res.json({success:true,movie,dateTime});
     } catch (error) {
@@ -135,5 +136,16 @@ export const getMovieTrailer = async(req, res) => {
         res.json({ success: true, key: trailer ? trailer.key : null });
     } catch (error) {
         res.json({ success: false, message: error.message });
+    }
+}
+
+export const getUpcomingMovies = async(req, res) => {
+    try {
+        const { data } = await axios.get('https://api.themoviedb.org/3/movie/upcoming', {
+            headers: { Authorization: `Bearer ${process.env.TMDB_API_KEY}` }
+        })
+        res.json({ success: true, movies: data.results })
+    } catch (error) {
+        res.json({ success: false, message: error.message })
     }
 }
