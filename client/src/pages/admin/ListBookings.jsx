@@ -41,7 +41,7 @@ const ListBookings = () => {
                     </tr>
                 </thead>
                 <tbody className='text-sm font-light'>
-                                    {bookings.map((item,index)=>(
+                                    {bookings.filter(item => item.show && item.show.movie && item.user).map((item,index)=>(
                                         <tr key={index} className='border-b border-primary/10 bg-primary/5 even:bg-primary/10'>
                                             <td className='p-2 min-w-45 pl-5'>{item.user.name}</td>
                                             <td className='p-2'>{item.show.movie.title}</td>
