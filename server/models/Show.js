@@ -3,7 +3,7 @@ import mongoose from "mongoose";
 const showSchema=new mongoose.Schema(
     {
         movie:{type:String,required:true,ref:'Movie'},
-        theater: { type: mongoose.Schema.Types.ObjectId, required: true, ref: 'Theater' },
+        theater: { type: String, required: false, ref: 'Theater' },
         showDateTime:{type:Date,required:true},
         showPrice:{type:Number,required:true},
         occupiedSeats:{type:Object,default:{}},

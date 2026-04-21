@@ -7,14 +7,14 @@ import { PlayCircleIcon } from 'lucide-react'
 const TrailersSection = () => {
 
     const [currentTrailer,setCurrentTrailer]=useState(dummyTrailers?.[0])
-    console.log(currentTrailer)
     return (
         <div className='px-6 md:px-16 lg:px-24 xl:px-44 py-20 overflow-hidden'>
             <p className='text-gray-300 font-medium text-lg max-w-[960px] mx-auto'>Trailers</p>
             <div className='relative mt-6'>
                 <BlurCircle top='-100px' right='-100px'/>
                 
-                <iframe width="960px" height="540px" src={currentTrailer?.videoUrl.replace("watch?v=", "embed/")}title="YouTube video player"
+                <iframe width="960px" height="540px" src={`https://www.youtube.com/embed/${currentTrailer?.videoUrl.split("v=")[1]?.split("&")[0]}`}
+                title="YouTube video player"
                 frameBorder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                 allowFullScreen/>
             </div>

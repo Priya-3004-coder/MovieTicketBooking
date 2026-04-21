@@ -1,17 +1,25 @@
 import Booking from "../models/Booking.js";
 import Show from "../models/Show.js";
 import User from "../models/User.js";
+import { clerkClient } from "@clerk/express";
 
 //Api to check if user is admin
-export const isAdmin=async(req,res)=>{
-    res.json({success:true,isAdmin:true});
+export const isAdmin = async(req, res) => {
+    try {
+        const { userId } = req.auth();
+        const user = await clerkClient.users.getUser(userId);
+        const isAdmin = user.privateMetadata.role === 'admin';
+        res.json({ success: true, isAdmin });
+    } catch (error) {
+        res.json({ success: false, isAdmin: false });
+    }
 }
 
 //API to get dashboard data
 export const getDashboardData=async(req,res)=>{
     try {
         const bookings=await Booking.find({isPaid:true});
-        const activeShows=await Show.find({showDateTime:{$gte:new Date()}}).populate('movie');
+        const activeShows=(await Show.find({showDateTime:{$gte:new Date()}}).populate('movie')).filter(show => show.movie);
 
         const totalUser=await User.countDocuments();
 
@@ -32,7 +40,7 @@ export const getDashboardData=async(req,res)=>{
 //API to get all shows
 export const getAllShows=async(req,res)=>{
     try {
-        const shows=(await Show.find({showDateTime:{$gte:new Date()}}).populate('movie')).toSorted((a, b) => new Date(a.showDateTime) - new Date(b.showDateTime));
+        const shows=(await Show.find({showDateTime:{$gte:new Date()}}).populate('movie')).filter(show => show.movie).toSorted((a, b) => new Date(a.showDateTime) - new Date(b.showDateTime));
         res.json({success:true,shows});
     } catch (error) {
         console.error(error);
@@ -44,10 +52,10 @@ export const getAllShows=async(req,res)=>{
 //API to get all Bookings
 export const getAllBookings=async(req,res)=>{
     try {
-        const bookings=await Booking.find({}).populate('user').populate({
+        const bookings=(await Booking.find({}).populate('user').populate({
             path:"show",
             populate:{path:'movie'}
-        }).sort({createdAt:-1})
+        }).sort({createdAt:-1})).filter(b => b.show && b.show.movie && b.user);
         res.json({success:true,bookings});
     } catch (error) {
         console.error(error);

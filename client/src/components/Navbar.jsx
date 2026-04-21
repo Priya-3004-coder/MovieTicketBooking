@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState ,useEffect} from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { assets } from '../assets/assets'
 import { MenuIcon, SearchIcon, TicketPlus, XIcon } from 'lucide-react'
@@ -11,10 +11,18 @@ const Navbar = () => {
     const {user}=useUser()
     const {openSignIn}=useClerk()
     const navigate=useNavigate()
-    const {favoriteMovies}=useAppContext()
+    const {favoriteMovies,shows}=useAppContext()
     const [showSearch, setShowSearch] = useState(false)
     const [searchQuery, setSearchQuery] = useState('')
-    const {shows} = useAppContext()
+
+    useEffect(() => {
+    const handleClick = (e) => {
+        if (!e.target.closest('.search-container')) setShowSearch(false)
+    }
+    document.addEventListener('mousedown', handleClick)
+    return () => document.removeEventListener('mousedown', handleClick)
+}, [])
+
 
 
 
@@ -37,31 +45,25 @@ const Navbar = () => {
             </div>
 
             <div className='flex items-center gap-8'>
+                <div className='search-container relative'>
                 <SearchIcon  onClick={() => setShowSearch(prev => !prev)} className='max-md:hidden w-6 h-6 cursor-pointer'/>
                 {showSearch && (
-    <div className='absolute top-16 right-36 bg-black/90 border border-gray-300/20 rounded-lg p-4 w-72 z-50'>
-        <input
-            autoFocus
-            type="text"
-            placeholder='Search movies...'
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className='w-full bg-transparent outline-none border-b border-gray-500 pb-2 text-sm'
-        />
-        <div className='mt-3 max-h-60 overflow-y-auto'>
-            {shows
+                <div className='absolute top-16 right-36 bg-black/90 border border-gray-300/20 rounded-lg p-4 w-72 z-50'>
+                <input autoFocus type="text" placeholder='Search movies...' value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)}
+                className='w-full bg-transparent outline-none border-b border-gray-500 pb-2 text-sm'/>
+                <div className='mt-3 max-h-60 overflow-y-auto'>
+                {shows
                 .filter(movie => movie.title.toLowerCase().includes(searchQuery.toLowerCase()))
                 .map((movie, index) => (
                     <div key={index} onClick={() => { navigate(`/movies/${movie._id}`); setShowSearch(false); scrollTo(0,0) }}
                         className='flex items-center gap-3 py-2 cursor-pointer hover:bg-white/10 px-2 rounded'>
                         <p className='text-sm'>{movie.title}</p>
                     </div>
-                ))
-            }
+                ))}
+                </div>
         </div>
-    </div>
-)}
-
+    )}
+</div>
                 {
                     !user ? (
                         <button onClick={openSignIn} className='px-4 py-1 sm:px-7 sm:py-2 bg-primary hover:bg-primary-dull transition rounded-full font-medium cursor-pointer'>Login</button>

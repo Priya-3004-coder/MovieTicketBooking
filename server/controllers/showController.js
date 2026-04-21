@@ -92,7 +92,7 @@ export const getShows=async(req,res)=>{
         //filter unique shows
         const uniqueShows = [];
         const seenIds = new Set();
-        shows.forEach(show => {
+        shows.filter(show => show.movie).forEach(show => {
             if (!seenIds.has(show.movie._id.toString())) {
                 seenIds.add(show.movie._id.toString());
                 uniqueShows.push(show.movie);
@@ -112,7 +112,7 @@ export const getShow=async(req,res)=>{
         const shows=await Show.find({movie:movieId,showDateTime:{$gte: new Date()}}).populate('theater');
         const movie=await Movie.findById(movieId);
         const dateTime={};
-        shows.forEach((show)=>{
+        shows.filter(show => show.movie).forEach((show)=>{
             const date=show.showDateTime.toISOString().split("T")[0];
             if(!dateTime[date]){
                 dateTime[date]=[];
